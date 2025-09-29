@@ -1,0 +1,16 @@
+from typing import Optional
+
+from pydantic import BaseModel, Field
+
+
+class DeckCreate(BaseModel):
+    title: str = Field(min_length=1, max_length=100)
+
+
+class DeckUpdate(BaseModel):
+    title: Optional[str] = Field(default=None, min_length=1, max_length=100)
+
+
+class DeckOut(BaseModel):
+    id: int
+    title: str
