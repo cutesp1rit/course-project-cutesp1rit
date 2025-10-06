@@ -42,6 +42,17 @@ docker compose up --build
 - `POST /items?name=...` — демо-сущность
 - `GET /items/{id}`
 
+#### Decks:
+- `POST /decks` — создать колоду
+- `GET /decks` — список колод
+- `GET /decks/{id}` — получить колоду
+- `PATCH /decks/{id}` — обновить title
+- `DELETE /decks/{id}` — удалить колоду
+
+#### Cards:
+- `POST /cards` — создать карточку
+- `GET /cards/{id}` — получить карточку
+
 ## Формат ошибок
 Все ошибки — JSON-обёртка:
 ```json
