@@ -23,6 +23,7 @@ pre-commit run --all-files
 ## Тесты
 ```bash
 pytest -q
+pytest -q -m nfr  # запустить только NFR-тесты
 ```
 
 ## CI
