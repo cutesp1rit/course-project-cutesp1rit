@@ -44,3 +44,10 @@ def test_security_headers_present_on_ok_and_error():
         "X-XSS-Protection": "0",
     }.items():
         assert err.headers.get(h) == v
+
+
+def test_body_size_limit_413():
+    big = "x" * (1_000_000 + 1)
+    r = client.post("/items", data=big)
+    assert r.status_code == 413
+    assert r.json()["error"]["code"] == "request_too_large"

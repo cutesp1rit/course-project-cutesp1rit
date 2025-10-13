@@ -55,7 +55,29 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         return response
 
 
+class BodySizeLimitMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app, max_bytes: int):
+        super().__init__(app)
+        self.max_bytes = max_bytes
+
+    async def dispatch(self, request: Request, call_next):
+        # Read limited body safely
+        body = await request.body()
+        if body and len(body) > self.max_bytes:
+            return JSONResponse(
+                status_code=413,
+                content={
+                    "error": {
+                        "code": "request_too_large",
+                        "message": f"body exceeds limit of {self.max_bytes} bytes",
+                    }
+                },
+            )
+        return await call_next(request)
+
+
 app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(BodySizeLimitMiddleware, max_bytes=1_000_000)
 
 
 @app.get("/health")
