@@ -1,6 +1,9 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
+
+pytestmark = pytest.mark.nfr
 
 client = TestClient(app)
 
@@ -17,3 +20,27 @@ def test_validation_error():
     assert r.status_code == 422
     body = r.json()
     assert body["error"]["code"] == "validation_error"
+
+
+def test_security_headers_present_on_ok_and_error():
+    # OK response
+    ok = client.get("/health")
+    assert ok.status_code == 200
+    for h, v in {
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "Referrer-Policy": "no-referrer",
+        "X-XSS-Protection": "0",
+    }.items():
+        assert ok.headers.get(h) == v
+
+    # Error response should also contain headers
+    err = client.get("/items/999")
+    assert err.status_code == 404
+    for h, v in {
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "Referrer-Policy": "no-referrer",
+        "X-XSS-Protection": "0",
+    }.items():
+        assert err.headers.get(h) == v

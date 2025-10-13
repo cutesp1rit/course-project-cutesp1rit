@@ -23,6 +23,7 @@ pre-commit run --all-files
 ## Тесты
 ```bash
 pytest -q
+pytest -q -m nfr  # запустить только NFR-тесты
 ```
 
 ## CI
@@ -62,3 +63,9 @@ docker compose up --build
 ```
 
 См. также: `SECURITY.md`, `.pre-commit-config.yaml`, `.github/workflows/ci.yml`.
+
+## Документы NFR
+См. `docs/nfr/`:
+- `docs/nfr/NFR.md`
+- `docs/nfr/NFR_BDD.md`
+- `docs/nfr/NFR_TRACEABILITY.md`
