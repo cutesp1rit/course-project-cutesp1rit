@@ -79,7 +79,7 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
 
 
 app.add_middleware(SecurityHeadersMiddleware)
-app.add_middleware(BodySizeLimitMiddleware, max_bytes=1_000_000)
+# BodySizeLimitMiddleware removed - size check is now in upload router
 
 
 @app.get("/health")

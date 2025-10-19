@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 from uuid import uuid4
 
 from fastapi.responses import JSONResponse
@@ -9,7 +9,7 @@ def problem(
     title: str,
     detail: str,
     type_: str = "about:blank",
-    extras: Dict[str, Any] | None = None,
+    extras: Optional[Dict[str, Any]] = None,
 ) -> JSONResponse:
     correlation_id = str(uuid4())
     payload: Dict[str, Any] = {

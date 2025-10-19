@@ -20,7 +20,10 @@ def test_upload_too_big(tmp_path):
     files = {"file": ("big.png", big, "image/png")}
     r = client.post("/upload", files=files)
     assert r.status_code == 413
-    assert r.json().get("status") == 413
+    # Check RFC7807 format
+    body = r.json()
+    assert body.get("status") == 413
+    assert body.get("title") == "Payload Too Large"
 
 
 def test_upload_bad_type(tmp_path):

@@ -1,5 +1,6 @@
 import uuid
 from pathlib import Path
+from typing import Optional
 
 MAX_BYTES = 5_000_000
 PNG = b"\x89PNG\r\n\x1a\n"
@@ -7,7 +8,7 @@ JPEG_SOI = b"\xff\xd8"
 JPEG_EOI = b"\xff\xd9"
 
 
-def sniff_image_type(data: bytes) -> str | None:
+def sniff_image_type(data: bytes) -> Optional[str]:
     if data.startswith(PNG):
         return "image/png"
     if data.startswith(JPEG_SOI) and data.endswith(JPEG_EOI):
