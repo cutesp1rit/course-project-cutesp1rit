@@ -5,10 +5,12 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.api.routers.cards import router as cards_router
 from app.api.routers.decks import router as decks_router
+from app.api.routers.upload import router as upload_router
 
 app = FastAPI(title="SecDev Course App", version="0.1.0")
 app.include_router(decks_router)
 app.include_router(cards_router)
+app.include_router(upload_router)
 
 
 class ApiError(Exception):
@@ -77,7 +79,7 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
 
 
 app.add_middleware(SecurityHeadersMiddleware)
-app.add_middleware(BodySizeLimitMiddleware, max_bytes=1_000_000)
+# BodySizeLimitMiddleware removed - size check is now in upload router
 
 
 @app.get("/health")

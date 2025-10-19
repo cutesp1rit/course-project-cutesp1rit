@@ -47,7 +47,11 @@ def test_security_headers_present_on_ok_and_error():
 
 
 def test_body_size_limit_413():
-    big = "x" * (1_000_000 + 1)
-    r = client.post("/items", data=big)
+    # Test upload endpoint with large file
+    big = b"\x89PNG\r\n\x1a\n" + b"0" * (5_000_001)
+    files = {"file": ("big.png", big, "image/png")}
+    r = client.post("/upload", files=files)
     assert r.status_code == 413
-    assert r.json()["error"]["code"] == "request_too_large"
+    body = r.json()
+    assert body.get("status") == 413
+    assert body.get("title") == "Payload Too Large"
