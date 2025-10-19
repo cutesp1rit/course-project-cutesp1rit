@@ -5,7 +5,7 @@ from app.main import app
 client = TestClient(app)
 
 
-def test_create_and_get_card():
+def test_create_and_get_card(test_db):
     r = client.post("/decks", json={"title": "Deck for cards"})
     deck_id = r.json()["id"]
 
@@ -21,6 +21,6 @@ def test_create_and_get_card():
     assert r.json() == card
 
 
-def test_create_card_on_missing_deck():
+def test_create_card_on_missing_deck(test_db):
     r = client.post("/cards", json={"deck_id": 999999, "front": "x", "back": "y"})
     assert r.status_code == 404
