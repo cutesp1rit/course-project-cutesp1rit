@@ -5,7 +5,7 @@ from app.main import app
 client = TestClient(app)
 
 
-def test_create_and_get_deck():
+def test_create_and_get_deck(test_db):
     r = client.post("/decks", json={"title": "French A1"})
     assert r.status_code == 200
     deck = r.json()
@@ -16,7 +16,7 @@ def test_create_and_get_deck():
     assert r.json() == deck
 
 
-def test_list_and_update_and_delete_deck():
+def test_list_and_update_and_delete_deck(test_db):
     r = client.post("/decks", json={"title": "Temp"})
     deck = r.json()
     did = deck["id"]

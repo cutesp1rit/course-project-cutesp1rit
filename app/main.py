@@ -6,6 +6,10 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from app.api.routers.cards import router as cards_router
 from app.api.routers.decks import router as decks_router
 from app.api.routers.upload import router as upload_router
+from app.database import Base, engine
+
+# Create database tables
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="SecDev Course App", version="0.1.0")
 app.include_router(decks_router)
