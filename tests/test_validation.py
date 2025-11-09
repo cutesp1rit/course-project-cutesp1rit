@@ -1,15 +1,12 @@
 """Тесты для валидации и нормализации данных (Decimal, UTC)."""
 
+import json
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
 import pytest
 
-from app.utils.validation import (
-    normalize_datetime_to_utc,
-    parse_decimal_safe,
-    parse_json_safe,
-)
+from app.utils.validation import normalize_datetime_to_utc, parse_decimal_safe, parse_json_safe
 
 
 def test_normalize_datetime_to_utc_with_timezone():
@@ -105,8 +102,6 @@ def test_parse_json_safe_with_float():
 
 def test_parse_json_safe_float_precision():
     """Негативный тест: проверка что parse_float=str избегает погрешностей"""
-    import json
-
     # JSON с float, который имеет известную погрешность
     json_str = '{"value": 0.1}'
 
