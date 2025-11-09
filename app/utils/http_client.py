@@ -55,6 +55,7 @@ class SecureHTTPClient:
         Raises:
             httpx.HTTPError: если все попытки неудачны
         """
+        last_exception = None
         for attempt in range(self.max_retries):
             try:
                 with httpx.Client(
@@ -64,13 +65,14 @@ class SecureHTTPClient:
                     response = client.get(url, **kwargs)
                     response.raise_for_status()
                     return response
-            except (httpx.HTTPError, httpx.TimeoutException):
-                if attempt == self.max_retries - 1:
-                    raise
-                # Exponential backoff
-                delay = self.retry_delay * (2**attempt)
-                time.sleep(delay)
-        raise httpx.HTTPError("Max retries exceeded")
+            except (httpx.HTTPError, httpx.TimeoutException) as e:
+                last_exception = e
+                if attempt < self.max_retries - 1:
+                    # Exponential backoff
+                    delay = self.retry_delay * (2**attempt)
+                    time.sleep(delay)
+        # Все попытки исчерпаны
+        raise httpx.HTTPError("Max retries exceeded") from last_exception
 
     def post(
         self,
@@ -92,6 +94,7 @@ class SecureHTTPClient:
         Raises:
             httpx.HTTPError: если все попытки неудачны
         """
+        last_exception = None
         for attempt in range(self.max_retries):
             try:
                 with httpx.Client(
@@ -101,13 +104,14 @@ class SecureHTTPClient:
                     response = client.post(url, **kwargs)
                     response.raise_for_status()
                     return response
-            except (httpx.HTTPError, httpx.TimeoutException):
-                if attempt == self.max_retries - 1:
-                    raise
-                # Exponential backoff
-                delay = self.retry_delay * (2**attempt)
-                time.sleep(delay)
-        raise httpx.HTTPError("Max retries exceeded")
+            except (httpx.HTTPError, httpx.TimeoutException) as e:
+                last_exception = e
+                if attempt < self.max_retries - 1:
+                    # Exponential backoff
+                    delay = self.retry_delay * (2**attempt)
+                    time.sleep(delay)
+        # Все попытки исчерпаны
+        raise httpx.HTTPError("Max retries exceeded") from last_exception
 
 
 # Глобальный экземпляр с безопасными настройками по умолчанию

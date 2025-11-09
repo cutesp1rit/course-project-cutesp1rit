@@ -7,7 +7,7 @@ from app.main import app
 client = TestClient(app)
 
 
-def test_deck_not_found_rfc7807():
+def test_deck_not_found_rfc7807(test_db):
     """Тест: ошибка 404 для несуществующей колоды в формате RFC 7807"""
     r = client.get("/decks/99999")
     assert r.status_code == 404
@@ -25,7 +25,7 @@ def test_deck_not_found_rfc7807():
     assert r.headers.get("content-type") == "application/problem+json"
 
 
-def test_card_not_found_rfc7807():
+def test_card_not_found_rfc7807(test_db):
     """Тест: ошибка 404 для несуществующей карточки в формате RFC 7807"""
     r = client.get("/cards/99999")
     assert r.status_code == 404
@@ -90,7 +90,7 @@ def test_upload_too_big_rfc7807():
     assert body.get("code") == "too_big"
 
 
-def test_correlation_id_unique():
+def test_correlation_id_unique(test_db):
     """Тест: correlation_id уникален для каждого запроса"""
     r1 = client.get("/decks/99999")
     r2 = client.get("/decks/99998")
