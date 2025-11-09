@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.schemas.deck import DeckCreate, DeckOut, DeckUpdate
 from app.services.storage import DatabaseStorage
+from app.utils.problem import problem
 
 router = APIRouter(prefix="/decks", tags=["decks"])
 
@@ -26,7 +27,9 @@ def get_deck(deck_id: int, db: Session = Depends(get_db)):
     storage = DatabaseStorage(db)
     deck = storage.get_deck(deck_id)
     if not deck:
-        raise HTTPException(status_code=404, detail="deck not found")
+        return problem(
+            404, "Not Found", "deck not found", extras={"code": "deck_not_found"}
+        )
     return deck
 
 
@@ -35,7 +38,9 @@ def update_deck(deck_id: int, payload: DeckUpdate, db: Session = Depends(get_db)
     storage = DatabaseStorage(db)
     deck = storage.update_deck(deck_id, payload.title)
     if not deck:
-        raise HTTPException(status_code=404, detail="deck not found")
+        return problem(
+            404, "Not Found", "deck not found", extras={"code": "deck_not_found"}
+        )
     return deck
 
 
@@ -44,4 +49,6 @@ def delete_deck(deck_id: int, db: Session = Depends(get_db)):
     storage = DatabaseStorage(db)
     deleted = storage.delete_deck(deck_id)
     if not deleted:
-        raise HTTPException(status_code=404, detail="deck not found")
+        return problem(
+            404, "Not Found", "deck not found", extras={"code": "deck_not_found"}
+        )
