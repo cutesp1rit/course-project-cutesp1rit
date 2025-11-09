@@ -1,7 +1,8 @@
+import json
 from typing import Any, Dict, Optional
 from uuid import uuid4
 
-from fastapi.responses import JSONResponse
+from fastapi.responses import Response
 
 
 def problem(
@@ -10,7 +11,7 @@ def problem(
     detail: str,
     type_: str = "about:blank",
     extras: Optional[Dict[str, Any]] = None,
-) -> JSONResponse:
+) -> Response:
     correlation_id = str(uuid4())
     payload: Dict[str, Any] = {
         "type": type_,
@@ -21,6 +22,8 @@ def problem(
     }
     if extras:
         payload.update(extras)
-    resp = JSONResponse(payload, status_code=status)
-    resp.media_type = "application/problem+json"
-    return resp
+    return Response(
+        content=json.dumps(payload),
+        status_code=status,
+        media_type="application/problem+json",
+    )

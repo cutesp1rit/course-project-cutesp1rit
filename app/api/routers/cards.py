@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.schemas.card import CardCreate, CardOut
 from app.services.storage import DatabaseStorage
+from app.utils.problem import problem
 
 router = APIRouter(prefix="/cards", tags=["cards"])
 
@@ -13,7 +14,7 @@ def create_card(payload: CardCreate, db: Session = Depends(get_db)):
     storage = DatabaseStorage(db)
     card = storage.create_card(payload.deck_id, payload.front, payload.back)
     if not card:
-        raise HTTPException(status_code=404, detail="deck not found")
+        return problem(404, "Not Found", "deck not found", extras={"code": "deck_not_found"})
     return card
 
 
@@ -22,5 +23,5 @@ def get_card(card_id: int, db: Session = Depends(get_db)):
     storage = DatabaseStorage(db)
     card = storage.get_card(card_id)
     if not card:
-        raise HTTPException(status_code=404, detail="card not found")
+        return problem(404, "Not Found", "card not found", extras={"code": "card_not_found"})
     return card

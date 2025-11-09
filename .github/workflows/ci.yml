@@ -28,7 +28,7 @@ jobs:
       - name: Lint & Format
         run: |
           ruff check --output-format=github .
-          black --check .
+          ruff format --check .
           isort --check-only .
 
       - name: Tests
