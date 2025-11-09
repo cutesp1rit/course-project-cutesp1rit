@@ -15,5 +15,7 @@ async def upload_image(file: UploadFile = File(...)):
     except ValueError as e:
         code = str(e)
         if code == "too_big":
-            return problem(413, "Payload Too Large", "body too big", extras={"code": code})
+            return problem(
+                413, "Payload Too Large", "body too big", extras={"code": code}
+            )
         return problem(400, "Bad Request", code, extras={"code": code})

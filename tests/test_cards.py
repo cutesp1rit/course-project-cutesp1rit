@@ -9,7 +9,9 @@ def test_create_and_get_card(test_db):
     r = client.post("/decks", json={"title": "Deck for cards"})
     deck_id = r.json()["id"]
 
-    r = client.post("/cards", json={"deck_id": deck_id, "front": "manger", "back": "to eat"})
+    r = client.post(
+        "/cards", json={"deck_id": deck_id, "front": "manger", "back": "to eat"}
+    )
     assert r.status_code == 200
     card = r.json()
     assert card["deck_id"] == deck_id and card["id"] >= 1
