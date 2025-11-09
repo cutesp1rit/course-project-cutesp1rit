@@ -27,9 +27,7 @@ def get_deck(deck_id: int, db: Session = Depends(get_db)):
     storage = DatabaseStorage(db)
     deck = storage.get_deck(deck_id)
     if not deck:
-        return problem(
-            404, "Not Found", "deck not found", extras={"code": "deck_not_found"}
-        )
+        return problem(404, "Not Found", "deck not found", extras={"code": "deck_not_found"})
     return deck
 
 
@@ -38,9 +36,7 @@ def update_deck(deck_id: int, payload: DeckUpdate, db: Session = Depends(get_db)
     storage = DatabaseStorage(db)
     deck = storage.update_deck(deck_id, payload.title)
     if not deck:
-        return problem(
-            404, "Not Found", "deck not found", extras={"code": "deck_not_found"}
-        )
+        return problem(404, "Not Found", "deck not found", extras={"code": "deck_not_found"})
     return deck
 
 
@@ -49,6 +45,4 @@ def delete_deck(deck_id: int, db: Session = Depends(get_db)):
     storage = DatabaseStorage(db)
     deleted = storage.delete_deck(deck_id)
     if not deleted:
-        return problem(
-            404, "Not Found", "deck not found", extras={"code": "deck_not_found"}
-        )
+        return problem(404, "Not Found", "deck not found", extras={"code": "deck_not_found"})

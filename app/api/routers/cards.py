@@ -14,9 +14,7 @@ def create_card(payload: CardCreate, db: Session = Depends(get_db)):
     storage = DatabaseStorage(db)
     card = storage.create_card(payload.deck_id, payload.front, payload.back)
     if not card:
-        return problem(
-            404, "Not Found", "deck not found", extras={"code": "deck_not_found"}
-        )
+        return problem(404, "Not Found", "deck not found", extras={"code": "deck_not_found"})
     return card
 
 
@@ -25,7 +23,5 @@ def get_card(card_id: int, db: Session = Depends(get_db)):
     storage = DatabaseStorage(db)
     card = storage.get_card(card_id)
     if not card:
-        return problem(
-            404, "Not Found", "card not found", extras={"code": "card_not_found"}
-        )
+        return problem(404, "Not Found", "card not found", extras={"code": "card_not_found"})
     return card
