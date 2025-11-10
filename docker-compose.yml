@@ -1,0 +1,39 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${IMAGE_NAME:-cutesp1rit-app}:latest
+    container_name: cutesp1rit-app
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+      - DATABASE_URL=sqlite:///./data/app.db
+      - APP_ENV=${APP_ENV:-production}
+    volumes:
+      # Persistent volume for SQLite database
+      - ./data:/app/data:rw
+      # Persistent volume for uploads
+      - ./var/uploads:/app/var/uploads:rw
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    # Security hardening
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    read_only: false  # Set to false because we need to write to database and uploads
+    tmpfs:
+      - /tmp
+      - /var/tmp
+    restart: unless-stopped
