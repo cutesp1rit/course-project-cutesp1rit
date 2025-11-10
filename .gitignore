@@ -16,3 +16,5 @@ build/
 .DS_Store
 PR_BODY_DB.md
 PR_BODY_P06.md
+data/
+*.db
