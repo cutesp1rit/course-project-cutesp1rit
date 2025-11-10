@@ -37,5 +37,3 @@ services:
       - /tmp
       - /var/tmp
     restart: unless-stopped
-
-
