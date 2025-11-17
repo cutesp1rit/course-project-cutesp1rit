@@ -1,5 +1,7 @@
 # SecDev Course Template
 
+![CI](https://github.com/cutesp1rit/course-project-cutesp1rit/actions/workflows/ci.yml/badge.svg)
+
 Стартовый шаблон для студенческого репозитория (HSE SecDev 2025).
 
 ## Быстрый старт
@@ -13,8 +15,8 @@ uvicorn app.main:app --reload
 
 ## Ритуал перед PR
 ```bash
-ruff --fix .
-black .
+ruff check --fix .
+ruff format .
 isort .
 pytest -q
 pre-commit run --all-files
