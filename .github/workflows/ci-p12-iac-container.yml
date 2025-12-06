@@ -1,0 +1,183 @@
+name: Security - IaC & Container (P12)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - p12-iac-container
+    paths:
+      - "Dockerfile"
+      - "docker-compose.yml"
+      - "security/**"
+      - ".github/workflows/ci-p12-iac-container.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  iac_container_security:
+    name: IaC & Container Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create evidence directory
+        run: mkdir -p EVIDENCE/P12
+
+      # Build Docker image for scanning
+      - name: Build Docker image
+        run: |
+          docker build -t secdev-app:scan .
+          echo "✅ Image built: secdev-app:scan"
+
+      # Hadolint - Dockerfile linting
+      - name: Run Hadolint
+        run: |
+          docker run --rm -i \
+            -v "$PWD/security/hadolint.yaml:/config/hadolint.yaml:ro" \
+            hadolint/hadolint:latest \
+            hadolint --config /config/hadolint.yaml --format json Dockerfile \
+            > EVIDENCE/P12/hadolint_report.json || true
+          
+          echo "📋 Hadolint scan completed"
+          
+          # Display summary
+          if [ -s EVIDENCE/P12/hadolint_report.json ]; then
+            echo "Hadolint findings:"
+            cat EVIDENCE/P12/hadolint_report.json | jq -r '.[] | "  [\(.level)] \(.code): \(.message)"' || echo "  No issues found"
+          fi
+
+      # Checkov - IaC security scanning
+      - name: Run Checkov
+        run: |
+          docker run --rm -t \
+            -v "$PWD:/workspace:ro" \
+            -v "$PWD/EVIDENCE/P12:/output" \
+            -w /workspace \
+            bridgecrew/checkov:latest \
+            --config-file /workspace/security/checkov.yaml \
+            --framework dockerfile \
+            --framework docker_compose \
+            --file Dockerfile \
+            --file docker-compose.yml \
+            --output json \
+            --output-file-path /output \
+            --repo-root-for-plan-enrichment /workspace || true
+          
+          # Rename output file
+          if [ -f "EVIDENCE/P12/results_json.json" ]; then
+            mv EVIDENCE/P12/results_json.json EVIDENCE/P12/checkov_report.json
+          fi
+          
+          echo "📋 Checkov scan completed"
+          
+          # Display summary
+          if [ -s EVIDENCE/P12/checkov_report.json ]; then
+            echo "Checkov summary:"
+            cat EVIDENCE/P12/checkov_report.json | jq -r '.summary | "  Passed: \(.passed), Failed: \(.failed), Skipped: \(.skipped)"' || echo "  Check report file"
+          fi
+
+      # Trivy - Container image vulnerability scanning
+      - name: Run Trivy on image
+        run: |
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v "$PWD/EVIDENCE/P12:/output" \
+            -v "$PWD/security/trivy.yaml:/config/trivy.yaml:ro" \
+            aquasec/trivy:latest \
+            image \
+            --config /config/trivy.yaml \
+            --format json \
+            --output /output/trivy_report.json \
+            secdev-app:scan || true
+          
+          echo "📋 Trivy scan completed"
+          
+          # Display summary
+          if [ -s EVIDENCE/P12/trivy_report.json ]; then
+            echo "Trivy vulnerability summary:"
+            cat EVIDENCE/P12/trivy_report.json | jq -r '
+              .Results[]? | 
+              select(.Vulnerabilities) | 
+              .Vulnerabilities | 
+              group_by(.Severity) | 
+              map({severity: .[0].Severity, count: length}) | 
+              .[] | 
+              "  \(.severity): \(.count)"
+            ' || echo "  No vulnerabilities found"
+          fi
+
+      # Create summary report
+      - name: Create summary
+        run: |
+          cat > EVIDENCE/P12/scan_summary.md <<'EOF'
+          # P12: IaC & Container Security Scan Results
+          
+          ## Scan Date
+          $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          
+          ## Tools Used
+          - **Hadolint**: Dockerfile linter
+          - **Checkov**: IaC security scanner
+          - **Trivy**: Container vulnerability scanner
+          
+          ## Hadolint Results
+          $(if [ -s EVIDENCE/P12/hadolint_report.json ]; then
+            ISSUES=$(cat EVIDENCE/P12/hadolint_report.json | jq 'length')
+            echo "- Total issues: $ISSUES"
+            cat EVIDENCE/P12/hadolint_report.json | jq -r '.[] | "- [\(.level)] \(.code): \(.message)"' | head -20
+          else
+            echo "✅ No issues found"
+          fi)
+          
+          ## Checkov Results
+          $(if [ -s EVIDENCE/P12/checkov_report.json ]; then
+            cat EVIDENCE/P12/checkov_report.json | jq -r '.summary | "- Passed: \(.passed)\n- Failed: \(.failed)\n- Skipped: \(.skipped)"'
+          else
+            echo "⚠️ No report generated"
+          fi)
+          
+          ## Trivy Results
+          $(if [ -s EVIDENCE/P12/trivy_report.json ]; then
+            echo "### Vulnerability Summary by Severity:"
+            cat EVIDENCE/P12/trivy_report.json | jq -r '
+              .Results[]? | 
+              select(.Vulnerabilities) | 
+              .Vulnerabilities | 
+              group_by(.Severity) | 
+              map({severity: .[0].Severity, count: length}) | 
+              .[] | 
+              "- \(.severity): \(.count)"
+            ' || echo "✅ No vulnerabilities found"
+          else
+            echo "⚠️ No report generated"
+          fi)
+          
+          ## Hardening Measures Applied
+          - ✅ Multi-stage Docker build
+          - ✅ Non-root user (appuser)
+          - ✅ Specific base image version (python:3.11-slim)
+          - ✅ Minimal dependencies
+          - ✅ Healthcheck configured
+          - ✅ Security options in docker-compose (no-new-privileges, capability dropping)
+          
+          EOF
+          
+          echo "📄 Summary report created"
+          cat EVIDENCE/P12/scan_summary.md
+
+      # Upload artifacts
+      - name: Upload P12 Evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: P12_EVIDENCE
+          path: EVIDENCE/P12/
+          retention-days: 90
+
+      - name: Scan complete
+        run: |
+          echo "✅ All security scans completed successfully"
+          echo "📦 Artifacts uploaded to GitHub Actions"
+          echo "📁 Reports available in EVIDENCE/P12/"

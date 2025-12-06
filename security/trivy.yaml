@@ -1,0 +1,46 @@
+# Trivy configuration for container image and IaC scanning
+# https://aquasecurity.github.io/trivy/
+
+# Scan settings
+scan:
+  # Security checks to enable
+  security-checks:
+    - vuln      # Vulnerabilities
+    - config    # Misconfigurations
+    - secret    # Secrets
+
+# Vulnerability settings
+vulnerability:
+  # Vulnerability types to detect
+  type:
+    - os        # OS packages
+    - library   # Application dependencies
+
+# Severity levels to report
+severity:
+  - CRITICAL
+  - HIGH
+  - MEDIUM
+  - LOW
+  - UNKNOWN
+
+# Output format
+format: json
+
+# Exit code (0 = don't fail on findings, for initial assessment)
+exit-code: 0
+
+# Ignore unfixed vulnerabilities
+ignore-unfixed: false
+
+# Timeout for scanning
+timeout: 10m
+
+# Skip files/directories
+skip-files:
+  - "**/.venv/**"
+  - "**/node_modules/**"
+  - "**/.git/**"
+
+# Skip specific vulnerabilities (if needed)
+# ignorefile: .trivyignore

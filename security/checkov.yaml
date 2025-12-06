@@ -1,0 +1,23 @@
+# Checkov configuration for IaC security scanning
+# https://www.checkov.io/
+
+# Output settings
+quiet: false
+compact: true
+
+# Frameworks to scan
+framework:
+  - dockerfile
+  - docker_compose
+
+# Skip specific checks if needed (example)
+skip-check:
+  # Example: Skip checks that are not relevant for this project
+  # - CKV_DOCKER_2  # Ensure that HEALTHCHECK instructions have been added
+  # - CKV_DOCKER_3  # Ensure that a user for the container has been created
+
+# Soft fail mode (don't fail the build on findings)
+soft-fail: false
+
+# Download external modules
+download-external-modules: false

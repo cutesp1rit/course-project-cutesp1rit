@@ -1,0 +1,17 @@
+# Hadolint configuration for Dockerfile linting
+# https://github.com/hadolint/hadolint
+
+# Ignore specific rules if needed
+ignored:
+  # DL3008: Pin versions in apt-get install (we use --no-install-recommends and clean up)
+  # DL3018: Pin versions in apk add (not applicable for Debian-based images)
+  - DL3018
+
+# Optional: Set failure threshold
+failure-threshold: warning
+
+# Trusted registries (optional)
+trustedRegistries:
+  - docker.io
+  - gcr.io
+  - ghcr.io
