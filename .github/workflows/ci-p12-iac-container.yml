@@ -35,8 +35,10 @@ jobs:
       # Hadolint - Dockerfile linting
       - name: Run Hadolint
         run: |
-          docker run --rm -i \
+          docker run --rm \
+            -v "$PWD:/workspace:ro" \
             -v "$PWD/security/hadolint.yaml:/config/hadolint.yaml:ro" \
+            -w /workspace \
             hadolint/hadolint:latest \
             hadolint --config /config/hadolint.yaml --format json Dockerfile \
             > EVIDENCE/P12/hadolint_report.json || true
@@ -52,19 +54,17 @@ jobs:
       # Checkov - IaC security scanning
       - name: Run Checkov
         run: |
-          docker run --rm -t \
+          docker run --rm \
             -v "$PWD:/workspace:ro" \
             -v "$PWD/EVIDENCE/P12:/output" \
             -w /workspace \
             bridgecrew/checkov:latest \
-            --config-file /workspace/security/checkov.yaml \
+            --directory /workspace \
             --framework dockerfile \
             --framework docker_compose \
-            --file Dockerfile \
-            --file docker-compose.yml \
             --output json \
             --output-file-path /output \
-            --repo-root-for-plan-enrichment /workspace || true
+            --compact || true
           
           # Rename output file
           if [ -f "EVIDENCE/P12/results_json.json" ]; then
