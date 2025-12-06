@@ -71,5 +71,3 @@ class SecretManager:
         if len(value) <= visible_chars:
             return "*" * len(value)
         return value[:visible_chars] + "*" * (len(value) - visible_chars)
-
-

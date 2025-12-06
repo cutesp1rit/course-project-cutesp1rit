@@ -147,5 +147,3 @@ def test_http_client_exponential_backoff():
         assert len(sleep_times) == 2  # 2 ретрая перед финальной ошибкой
         assert sleep_times[0] == 0.5  # Первая задержка
         assert sleep_times[1] == 1.0  # Вторая задержка (0.5 * 2^1)
-
-
