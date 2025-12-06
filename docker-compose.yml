@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ${IMAGE_NAME:-cutesp1rit-app}:latest
+    image: ${IMAGE_NAME:-cutesp1rit-app}:${IMAGE_TAG:-1.0.0}
     container_name: cutesp1rit-app
     ports:
       - "${PORT:-8000}:8000"
