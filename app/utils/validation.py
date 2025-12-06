@@ -60,3 +60,5 @@ def parse_json_safe(raw_json: str, parse_float: type = str) -> dict:
         dict с распарсенными данными
     """
     return json.loads(raw_json, parse_float=parse_float)
+
+
